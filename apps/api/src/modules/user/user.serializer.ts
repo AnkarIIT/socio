@@ -10,6 +10,7 @@ export type PublicUserRow = {
   isPrivate: boolean;
   locale: string;
   createdAt: Date;
+  profile?: { bio: string | null } | null;
 };
 
 /** Maps a User row to the public contract shape. */
@@ -20,7 +21,7 @@ export function toUserPublic(user: PublicUserRow): UserPublic {
     name: user.name,
     avatarUrl: user.avatarUrl,
     coverUrl: user.coverUrl,
-    bio: null,
+    bio: user.profile?.bio ?? null,
     isVerified: user.isVerified,
     isPrivate: user.isPrivate,
     locale: user.locale,

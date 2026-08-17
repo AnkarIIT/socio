@@ -9,6 +9,11 @@ import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { HealthModule } from './modules/health/health.module';
+import { PostModule } from './modules/post/post.module';
+import { CommentModule } from './modules/comment/comment.module';
+import { LikeModule } from './modules/like/like.module';
+import { MediaModule } from './modules/media/media.module';
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -19,6 +24,11 @@ import { HealthModule } from './modules/health/health.module';
     HealthModule,
     AuthModule,
     UserModule,
+    PostModule,
+    CommentModule,
+    LikeModule,
+    MediaModule,
+    SearchModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

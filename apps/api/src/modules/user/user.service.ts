@@ -9,7 +9,10 @@ export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async me(userId: string): Promise<UserPublic> {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { profile: true },
+    });
     if (!user) throw notFound('User not found');
     return toUserPublic(user);
   }
@@ -24,7 +27,10 @@ export class UserService {
   }
 
   async getByUsername(username: string): Promise<UserPublic> {
-    const user = await this.prisma.user.findUnique({ where: { username } });
+    const user = await this.prisma.user.findUnique({
+      where: { username },
+      include: { profile: true },
+    });
     if (!user || user.bannedAt) throw notFound('User not found');
     return toUserPublic(user);
   }
