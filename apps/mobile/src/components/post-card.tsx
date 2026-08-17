@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { BharatColors, Radius, Spacing, FontSize, FontWeight } from '@/constants/theme';
 import { useLikePost } from '@/hooks/use-api';
 import type { Post } from '@/types/api';
@@ -31,6 +32,8 @@ export function PostCard({ post }: PostCardProps) {
     likeMutation.mutate(post.id);
   };
 
+  const hasImage = !!post.mediaUrl;
+
   return (
     <View style={styles.card}>
       {/* Author row */}
@@ -58,15 +61,25 @@ export function PostCard({ post }: PostCardProps) {
         </Pressable>
       </View>
 
-      {/* Post image placeholder */}
-      <View style={styles.imagePlaceholder}>
-        <View style={styles.imagePlaceholderInner}>
-          <Ionicons name="image-outline" size={40} color={BharatColors.textSecondary} />
+      {/* Post image */}
+      {hasImage ? (
+        <Image
+          source={{ uri: post.mediaUrl! }}
+          style={styles.postImage}
+          contentFit="cover"
+          transition={300}
+          placeholder={{ blurhash: 'LGF5]+Yk^6#M@-5c,1J5@[or[Q6.' }}
+        />
+      ) : (
+        <View style={styles.textOnlyPost}>
+          <Text style={styles.textOnlyBody}>{post.body}</Text>
         </View>
-      </View>
+      )}
 
-      {/* Post body */}
-      <Text style={styles.body}>{post.body}</Text>
+      {/* Post body (shown below image if image exists) */}
+      {hasImage && (
+        <Text style={styles.body}>{post.body}</Text>
+      )}
 
       {/* Action row */}
       <View style={styles.actionRow}>
@@ -147,15 +160,18 @@ const styles = StyleSheet.create({
   moreButton: {
     padding: Spacing.sm,
   },
-  imagePlaceholder: {
+  postImage: {
     width: '100%',
     aspectRatio: 1,
-    backgroundColor: '#F1F5F9',
   },
-  imagePlaceholderInner: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  textOnlyPost: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xl,
+  },
+  textOnlyBody: {
+    color: BharatColors.textOnSurface,
+    fontSize: FontSize.lg,
+    lineHeight: 24,
   },
   body: {
     color: BharatColors.textOnSurface,

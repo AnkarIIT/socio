@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import type { FeedResponse, Post, ProfileResponse, User } from '@/types/api';
+import type { FeedResponse, Post, ProfileResponse, SearchResponse, User } from '@/types/api';
 
 export function useFeed() {
   return useInfiniteQuery({
@@ -138,12 +138,36 @@ export function useFollowUser() {
 export function useSearchUsers(query: string) {
   return useQuery({
     queryKey: ['search', 'users', query],
-    queryFn: () =>
-      api.get<{ users: User[]; posts: { id: string; text: string | null; author: { username: string; name: string; avatarUrl: string | null }; createdAt: string }[]; hashtags: { tag: string; postCount: number }[] }>(
-        `/search?q=${encodeURIComponent(query)}`,
-      ),
+    queryFn: () => api.get<SearchResponse>(`/search?q=${encodeURIComponent(query)}`),
     enabled: query.length >= 2,
   });
+}
+
+export async function uploadMedia(
+  uri: string,
+  mimeType: string,
+  sizeBytes: number,
+  filename: string,
+): Promise<{ assetId: string; key: string }> {
+  const presign = await api.post<{
+    uploadUrl: string;
+    assetId: string;
+    key: string;
+    expiresAt: string;
+  }>('/media/presign', { filename, mimeType, sizeBytes });
+
+  const response = await fetch(uri);
+  const blob = await response.blob();
+
+  await fetch(presign.uploadUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': mimeType },
+    body: blob,
+  });
+
+  await api.post('/media/complete', { assetId: presign.assetId });
+
+  return { assetId: presign.assetId, key: presign.key };
 }
 
 const MOCK_USER: User = {

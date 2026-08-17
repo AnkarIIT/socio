@@ -53,3 +53,31 @@ export interface Story {
   user: User;
   hasUnviewed: boolean;
 }
+
+export interface SearchResponse {
+  users: User[];
+  posts: {
+    id: string;
+    text: string | null;
+    author: { username: string; name: string; avatarUrl: string | null };
+    createdAt: string;
+  }[];
+  hashtags: { tag: string; postCount: number }[];
+}
+
+export interface PresignResponse {
+  uploadUrl: string;
+  assetId: string;
+  key: string;
+  expiresAt: string;
+}
+
+export interface MediaAsset {
+  id: string;
+  kind: 'IMAGE' | 'VIDEO';
+  status: 'PROCESSING' | 'READY' | 'FAILED';
+  mimeType: string | null;
+  width: number | null;
+  height: number | null;
+  createdAt: string;
+}

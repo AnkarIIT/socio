@@ -6,26 +6,49 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
-  Image,
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BharatColors, Spacing, FontSize, FontWeight, Radius } from '@/constants/theme';
-import { useCreatePost } from '@/hooks/use-api';
+import { useAuthStore } from '@/stores/auth-store';
+import { useCreatePost, uploadMedia } from '@/hooks/use-api';
+
+const MIME_MAP: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+  mp4: 'video/mp4',
+  mov: 'video/quicktime',
+};
+
+function getMimeType(uri: string): string {
+  const ext = uri.split('.').pop()?.toLowerCase() ?? 'jpg';
+  return MIME_MAP[ext] ?? 'image/jpeg';
+}
+
+function getFilename(uri: string): string {
+  return uri.split('/').pop() ?? `upload_${Date.now()}`;
+}
 
 export function CreatePostScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [body, setBody] = useState('');
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const createPost = useCreatePost();
+  const { user } = useAuthStore();
 
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -65,13 +88,36 @@ export function CreatePostScreen() {
       Alert.alert('Empty post', 'Write something or add a photo.');
       return;
     }
+    setUploading(true);
     try {
-      await createPost.mutateAsync({ body: body.trim() });
+      let mediaUrl: string | undefined;
+      let mediaType: string | undefined;
+
+      if (imageUri) {
+        const info = await FileSystem.getInfoAsync(imageUri);
+        const mimeType = getMimeType(imageUri);
+        const filename = getFilename(imageUri);
+        const sizeBytes = info.exists && 'size' in info ? info.size : 0;
+
+        const { key } = await uploadMedia(imageUri, mimeType, sizeBytes, filename);
+        mediaUrl = key;
+        mediaType = mimeType.startsWith('video/') ? 'video' : 'image';
+      }
+
+      await createPost.mutateAsync({
+        body: body.trim(),
+        mediaUrl,
+        mediaType,
+      });
       router.back();
     } catch (err: any) {
       Alert.alert('Error', err?.message ?? 'Failed to post. Try again.');
+    } finally {
+      setUploading(false);
     }
   };
+
+  const isBusy = uploading || createPost.isPending;
 
   return (
     <LinearGradient
@@ -92,11 +138,13 @@ export function CreatePostScreen() {
           <Pressable
             onPress={handlePost}
             style={[styles.postButton, (!body.trim() && !imageUri) && styles.postButtonDisabled]}
-            disabled={createPost.isPending}
+            disabled={isBusy}
           >
-            <Text style={styles.postButtonText}>
-              {createPost.isPending ? '...' : 'Post'}
-            </Text>
+            {isBusy ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={styles.postButtonText}>Post</Text>
+            )}
           </Pressable>
         </View>
 
@@ -108,9 +156,11 @@ export function CreatePostScreen() {
           {/* Author preview */}
           <View style={styles.authorRow}>
             <View style={styles.avatarSmall}>
-              <Text style={styles.avatarInitial}>Y</Text>
+              <Text style={styles.avatarInitial}>
+                {user?.username?.charAt(0).toUpperCase() ?? '?'}
+              </Text>
             </View>
-            <Text style={styles.authorName}>you</Text>
+            <Text style={styles.authorName}>{user?.username ?? 'you'}</Text>
           </View>
 
           {/* Text input area */}
@@ -129,7 +179,7 @@ export function CreatePostScreen() {
           {/* Image preview */}
           {imageUri && (
             <View style={styles.imagePreview}>
-              <Image source={{ uri: imageUri }} style={styles.previewImage} />
+              <Image source={{ uri: imageUri }} style={styles.previewImage} contentFit="cover" />
               <Pressable
                 onPress={() => setImageUri(null)}
                 style={styles.removeImage}
@@ -142,16 +192,16 @@ export function CreatePostScreen() {
 
         {/* Bottom action bar */}
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + Spacing.lg }]}>
-          <Pressable onPress={handleTakePhoto} style={styles.actionIcon}>
+          <Pressable onPress={handleTakePhoto} style={styles.actionIcon} disabled={isBusy}>
             <Ionicons name="camera-outline" size={24} color={BharatColors.accent} />
           </Pressable>
-          <Pressable onPress={handlePickImage} style={styles.actionIcon}>
+          <Pressable onPress={handlePickImage} style={styles.actionIcon} disabled={isBusy}>
             <Ionicons name="image-outline" size={24} color={BharatColors.accent} />
           </Pressable>
-          <Pressable style={styles.actionIcon}>
+          <Pressable style={styles.actionIcon} disabled={isBusy}>
             <Ionicons name="location-outline" size={24} color={BharatColors.accent} />
           </Pressable>
-          <Pressable style={styles.actionIcon}>
+          <Pressable style={styles.actionIcon} disabled={isBusy}>
             <Ionicons name="pricetag-outline" size={24} color={BharatColors.accent} />
           </Pressable>
         </View>
@@ -189,6 +239,8 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.sm,
+    minWidth: 60,
+    alignItems: 'center',
   },
   postButtonDisabled: {
     opacity: 0.5,
