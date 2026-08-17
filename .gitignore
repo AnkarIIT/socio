@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Generated code
+apps/api/src/generated/
+apps/api/prisma/generated/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Expo
+.expo/
+apps/mobile/.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Test coverage
+coverage/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

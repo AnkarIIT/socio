@@ -1,0 +1,29 @@
+{
+  "name": "bharat",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Instagram for Bharat — vernacular-first social network for India",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:packages": "npm run build --workspace @bharat/contracts --workspace @bharat/shared",
+    "dev:api": "npm run build:packages && npm run start:dev -w @bharat/api",
+    "dev:mobile": "npm run start -w @bharat/mobile",
+    "build": "npm run build:packages && npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run build:packages && npm run typecheck --workspaces --if-present",
+    "test": "npm run build:packages && npm run test --workspaces --if-present",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:migrate": "npm run prisma:migrate -w @bharat/api",
+    "db:generate": "npm run prisma:generate -w @bharat/api"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0"
+  }
+}
