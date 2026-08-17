@@ -20,14 +20,17 @@ const mockPrisma = {
     findUnique: jest.fn(),
     findMany: jest.fn(),
   },
-} as any;
+} satisfies Record<string, { [k: string]: jest.Mock }>;
 
 describe('PostService', () => {
   let service: PostService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [PostService, { provide: PrismaService, useValue: mockPrisma }],
+      providers: [
+        PostService,
+        { provide: PrismaService, useValue: mockPrisma },
+      ],
     }).compile();
 
     service = module.get(PostService);
@@ -45,11 +48,20 @@ describe('PostService', () => {
         shareCount: 0,
         publishedAt: new Date(),
         createdAt: new Date(),
-        author: { id: 'u1', username: 'test', name: 'Test', avatarUrl: null, isVerified: false },
+        author: {
+          id: 'u1',
+          username: 'test',
+          name: 'Test',
+          avatarUrl: null,
+          isVerified: false,
+        },
         media: [],
       });
 
-      const result = await service.create('u1', { text: 'Hello', status: 'PENDING' });
+      const result = await service.create('u1', {
+        text: 'Hello',
+        status: 'PENDING',
+      });
       expect(result.id).toBe('p1');
       expect(result.text).toBe('Hello');
     });
@@ -73,7 +85,13 @@ describe('PostService', () => {
         shareCount: 0,
         publishedAt: new Date(),
         createdAt: new Date(),
-        author: { id: 'u1', username: 'a', name: 'A', avatarUrl: null, isVerified: false },
+        author: {
+          id: 'u1',
+          username: 'a',
+          name: 'A',
+          avatarUrl: null,
+          isVerified: false,
+        },
         media: [],
       });
       mockPrisma.like.findUnique.mockResolvedValue(null);
@@ -93,14 +111,20 @@ describe('PostService', () => {
 
   describe('remove', () => {
     it('allows owner to delete', async () => {
-      mockPrisma.post.findUnique.mockResolvedValue({ id: 'p1', authorId: 'u1' });
+      mockPrisma.post.findUnique.mockResolvedValue({
+        id: 'p1',
+        authorId: 'u1',
+      });
       mockPrisma.post.delete.mockResolvedValue({});
       const result = await service.remove('p1', 'u1');
       expect(result).toEqual({ ok: true });
     });
 
     it('rejects non-owner', async () => {
-      mockPrisma.post.findUnique.mockResolvedValue({ id: 'p1', authorId: 'u1' });
+      mockPrisma.post.findUnique.mockResolvedValue({
+        id: 'p1',
+        authorId: 'u1',
+      });
       await expect(service.remove('p1', 'u2')).rejects.toMatchObject({
         code: ErrorCode.FORBIDDEN,
       });

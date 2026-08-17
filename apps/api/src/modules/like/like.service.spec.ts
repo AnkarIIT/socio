@@ -10,15 +10,18 @@ import { ErrorCode } from '@bharat/shared';
 const mockPrisma = {
   post: { findUnique: jest.fn(), update: jest.fn() },
   like: { findUnique: jest.fn(), create: jest.fn(), delete: jest.fn() },
-  $transaction: jest.fn((fns: any[]) => Promise.all(fns)),
-} as any;
+  $transaction: jest.fn((fns: unknown[]) => Promise.all(fns)),
+} satisfies Record<string, unknown>;
 
 describe('LikeService', () => {
   let service: LikeService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LikeService, { provide: PrismaService, useValue: mockPrisma }],
+      providers: [
+        LikeService,
+        { provide: PrismaService, useValue: mockPrisma },
+      ],
     }).compile();
 
     service = module.get(LikeService);
@@ -27,7 +30,9 @@ describe('LikeService', () => {
 
   it('adds a like', async () => {
     mockPrisma.post.findUnique.mockResolvedValue({
-      id: 'p1', status: 'PUBLISHED', likeCount: 5,
+      id: 'p1',
+      status: 'PUBLISHED',
+      likeCount: 5,
     });
     mockPrisma.like.findUnique.mockResolvedValue(null);
     mockPrisma.like.create.mockResolvedValue({});
@@ -40,7 +45,9 @@ describe('LikeService', () => {
 
   it('removes a like', async () => {
     mockPrisma.post.findUnique.mockResolvedValue({
-      id: 'p1', status: 'PUBLISHED', likeCount: 5,
+      id: 'p1',
+      status: 'PUBLISHED',
+      likeCount: 5,
     });
     mockPrisma.like.findUnique.mockResolvedValue({ id: 'l1' });
     mockPrisma.like.delete.mockResolvedValue({});
