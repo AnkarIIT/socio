@@ -12,7 +12,7 @@
     "dev:api": "npm run build:packages && npm run start:dev -w @bharat/api",
     "dev:mobile": "npm run start -w @bharat/mobile",
     "build": "npm run build:packages && npm run build --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
+    "lint": "npm run build:packages && npm run lint --workspaces --if-present",
     "typecheck": "npm run build:packages && npm run typecheck --workspaces --if-present",
     "test": "npm run build:packages && npm run test --workspaces --if-present",
     "db:up": "docker compose up -d",
