@@ -1,37 +1,38 @@
 import React from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BharatColors, Spacing, FontSize, FontWeight, Radius } from '@/constants/theme';
-import { useAuthStore } from '@/stores/auth-store';
-import { useProfile } from '@/hooks/use-api';
+import { useProfile, useFollowUser } from '@/hooks/use-api';
 
-export function ProfileScreen() {
+export function UserProfileScreen() {
+  const { username } = useLocalSearchParams<{ username: string }>();
   const insets = useSafeAreaInsets();
-  const { user: authUser, logout } = useAuthStore();
-  const profileQuery = useProfile(authUser?.username ?? '');
+  const router = useRouter();
+  const profileQuery = useProfile(username ?? '');
+  const followMutation = useFollowUser();
+
   const profile = profileQuery.data;
 
   return (
     <LinearGradient
       colors={[BharatColors.bgGradientTop, BharatColors.bgGradientBottom]}
-      style={[styles.container, { paddingTop: insets.top }]}
+      style={styles.container}
     >
       <StatusBar style="light" />
 
       {/* Header */}
-      <View style={styles.headerRow}>
-        <Text style={styles.headerTitle}>{authUser?.username ?? 'you'}</Text>
-        <View style={styles.headerActions}>
-          <Pressable style={styles.headerButton}>
-            <Ionicons name="add-circle-outline" size={24} color={BharatColors.textPrimary} />
-          </Pressable>
-          <Pressable style={styles.headerButton} onPress={logout}>
-            <Ionicons name="menu-outline" size={24} color={BharatColors.textPrimary} />
-          </Pressable>
-        </View>
+      <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
+        <Pressable onPress={() => router.back()} style={styles.headerButton}>
+          <Ionicons name="arrow-back" size={24} color={BharatColors.textPrimary} />
+        </Pressable>
+        <Text style={styles.headerTitle}>{username}</Text>
+        <Pressable style={styles.headerButton}>
+          <Ionicons name="ellipsis-vertical" size={20} color={BharatColors.textPrimary} />
+        </Pressable>
       </View>
 
       <ScrollView
@@ -42,11 +43,13 @@ export function ProfileScreen() {
         <View style={styles.profileSection}>
           <View style={styles.avatarLarge}>
             <Text style={styles.avatarInitial}>
-              {authUser?.username?.charAt(0).toUpperCase() ?? '?'}
+              {username?.charAt(0).toUpperCase() ?? '?'}
             </Text>
           </View>
-          <Text style={styles.profileName}>{authUser?.name ?? ''}</Text>
-          {authUser?.bio && <Text style={styles.profileBio}>{authUser.bio}</Text>}
+          <Text style={styles.profileName}>{profile?.user.name ?? username}</Text>
+          {profile?.user.bio && (
+            <Text style={styles.profileBio}>{profile.user.bio}</Text>
+          )}
         </View>
 
         {/* Stats */}
@@ -65,17 +68,22 @@ export function ProfileScreen() {
           </View>
         </View>
 
-        {/* Edit profile button */}
+        {/* Follow / Message buttons */}
         <View style={styles.actionsRow}>
-          <Pressable style={styles.editButton}>
-            <Text style={styles.editButtonText}>Edit Profile</Text>
+          <Pressable
+            style={[styles.followButton, profile?.isFollowing && styles.followingButton]}
+            onPress={() => profile && followMutation.mutate(profile.user.id)}
+          >
+            <Text style={[styles.followButtonText, profile?.isFollowing && styles.followingButtonText]}>
+              {profile?.isFollowing ? 'Following' : 'Follow'}
+            </Text>
           </Pressable>
-          <Pressable style={styles.shareButton}>
-            <Ionicons name="share-outline" size={18} color={BharatColors.textOnSurface} />
+          <Pressable style={styles.messageButton}>
+            <Text style={styles.messageButtonText}>Message</Text>
           </Pressable>
         </View>
 
-        {/* Grid/Favorites toggle */}
+        {/* Grid */}
         <View style={styles.gridToggle}>
           <Pressable style={[styles.toggleButton, styles.toggleActive]}>
             <Ionicons name="grid-outline" size={20} color={BharatColors.textOnSurface} />
@@ -83,12 +91,8 @@ export function ProfileScreen() {
           <Pressable style={styles.toggleButton}>
             <Ionicons name="heart-outline" size={20} color={BharatColors.textSecondary} />
           </Pressable>
-          <Pressable style={styles.toggleButton}>
-            <Ionicons name="person-outline" size={20} color={BharatColors.textSecondary} />
-          </Pressable>
         </View>
 
-        {/* Placeholder grid */}
         <View style={styles.grid}>
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <View key={i} style={styles.gridItem}>
@@ -105,24 +109,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerRow: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.xxl,
-    paddingVertical: Spacing.lg,
-  },
-  headerTitle: {
-    fontSize: FontSize.xxl,
-    fontWeight: FontWeight.bold,
-    color: BharatColors.textPrimary,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.md,
   },
   headerButton: {
     padding: Spacing.sm,
+  },
+  headerTitle: {
+    fontSize: FontSize.lg,
+    fontWeight: FontWeight.semibold,
+    color: BharatColors.textPrimary,
   },
   scrollContent: {
     backgroundColor: BharatColors.surface,
@@ -180,25 +180,35 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     marginBottom: Spacing.xl,
   },
-  editButton: {
+  followButton: {
     flex: 1,
-    backgroundColor: BharatColors.surfaceOverlay,
+    backgroundColor: BharatColors.accent,
     borderRadius: Radius.sm,
     paddingVertical: Spacing.md,
     alignItems: 'center',
   },
-  editButtonText: {
-    color: BharatColors.textOnSurface,
+  followingButton: {
+    backgroundColor: BharatColors.backgroundElement,
+  },
+  followButtonText: {
+    color: '#FFFFFF',
     fontSize: FontSize.sm,
     fontWeight: FontWeight.semibold,
   },
-  shareButton: {
-    backgroundColor: BharatColors.surfaceOverlay,
+  followingButtonText: {
+    color: BharatColors.textOnSurface,
+  },
+  messageButton: {
+    flex: 1,
+    backgroundColor: BharatColors.backgroundElement,
     borderRadius: Radius.sm,
-    paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     alignItems: 'center',
-    justifyContent: 'center',
+  },
+  messageButtonText: {
+    color: BharatColors.textOnSurface,
+    fontSize: FontSize.sm,
+    fontWeight: FontWeight.semibold,
   },
   gridToggle: {
     flexDirection: 'row',

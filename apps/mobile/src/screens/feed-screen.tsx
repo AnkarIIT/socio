@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StoryRing } from '@/components/story-ring';
 import { PostCard } from '@/components/post-card';
 import { BharatColors, Spacing, FontSize, FontWeight, Radius } from '@/constants/theme';
@@ -40,7 +41,10 @@ export function FeedScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <LinearGradient
+      colors={[BharatColors.bgGradientTop, BharatColors.bgGradientBottom]}
+      style={[styles.container, { paddingTop: insets.top }]}
+    >
       <StatusBar style="light" />
 
       {/* Header */}
@@ -91,14 +95,13 @@ export function FeedScreen() {
           />
         }
       />
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BharatColors.bgGradientTop,
   },
   header: {
     paddingHorizontal: Spacing.xxl,

@@ -3,13 +3,17 @@ import { View, Text, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { BharatColors, Spacing, FontSize, FontWeight } from '@/constants/theme';
 
 export function MessagesScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <LinearGradient
+      colors={[BharatColors.bgGradientTop, BharatColors.bgGradientBottom]}
+      style={[styles.container, { paddingTop: insets.top }]}
+    >
       <StatusBar style="light" />
 
       <View style={styles.header}>
@@ -25,14 +29,13 @@ export function MessagesScreen() {
           Start a conversation with someone you follow
         </Text>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BharatColors.bgGradientTop,
   },
   header: {
     paddingHorizontal: Spacing.xxl,

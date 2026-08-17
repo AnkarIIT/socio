@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '@/stores/auth-store';
 import { BharatColors, Radius, Spacing, FontSize, FontWeight } from '@/constants/theme';
 
@@ -53,85 +54,92 @@ export function AuthScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
+    <LinearGradient
+      colors={[BharatColors.bgGradientTop, BharatColors.bgGradientBottom]}
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <StatusBar style="light" />
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.logo}>Bharat</Text>
-          <Text style={styles.tagline}>Instagram for Bharat</Text>
-        </View>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <StatusBar style="light" />
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.logo}>Bharat</Text>
+            <Text style={styles.tagline}>Instagram for Bharat</Text>
+          </View>
 
-        {step === 'phone' ? (
-          <View style={styles.form}>
-            <Text style={styles.label}>Enter your mobile number</Text>
-            <View style={styles.phoneRow}>
-              <View style={styles.countryCode}>
-                <Text style={styles.countryCodeText}>+91</Text>
+          {step === 'phone' ? (
+            <View style={styles.form}>
+              <Text style={styles.label}>Enter your mobile number</Text>
+              <View style={styles.phoneRow}>
+                <View style={styles.countryCode}>
+                  <Text style={styles.countryCodeText}>+91</Text>
+                </View>
+                <TextInput
+                  style={styles.phoneInput}
+                  placeholder="98765 43210"
+                  placeholderTextColor="#64748B"
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  value={phone}
+                  onChangeText={setPhone}
+                  autoFocus
+                />
               </View>
+              <Pressable
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleRequestOtp}
+                disabled={loading}
+              >
+                <Text style={styles.buttonText}>
+                  {loading ? 'Sending...' : 'Send OTP'}
+                </Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.form}>
+              <Text style={styles.label}>Enter the code sent to +91 {phone}</Text>
               <TextInput
-                style={styles.phoneInput}
-                placeholder="98765 43210"
+                style={styles.otpInput}
+                placeholder="0000"
                 placeholderTextColor="#64748B"
-                keyboardType="phone-pad"
-                maxLength={10}
-                value={phone}
-                onChangeText={setPhone}
+                keyboardType="number-pad"
+                maxLength={6}
+                value={code}
+                onChangeText={setCode}
                 autoFocus
               />
+              <Pressable
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleVerifyOtp}
+                disabled={loading}
+              >
+                <Text style={styles.buttonText}>
+                  {loading ? 'Verifying...' : 'Verify'}
+                </Text>
+              </Pressable>
+              <Pressable onPress={() => setStep('phone')} style={styles.linkButton}>
+                <Text style={styles.linkText}>Change number</Text>
+              </Pressable>
             </View>
-            <Pressable
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleRequestOtp}
-              disabled={loading}
-            >
-              <Text style={styles.buttonText}>
-                {loading ? 'Sending...' : 'Send OTP'}
-              </Text>
-            </Pressable>
-          </View>
-        ) : (
-          <View style={styles.form}>
-            <Text style={styles.label}>Enter the code sent to +91 {phone}</Text>
-            <TextInput
-              style={styles.otpInput}
-              placeholder="0000"
-              placeholderTextColor="#64748B"
-              keyboardType="number-pad"
-              maxLength={6}
-              value={code}
-              onChangeText={setCode}
-              autoFocus
-            />
-            <Pressable
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleVerifyOtp}
-              disabled={loading}
-            >
-              <Text style={styles.buttonText}>
-                {loading ? 'Verifying...' : 'Verify'}
-              </Text>
-            </Pressable>
-            <Pressable onPress={() => setStep('phone')} style={styles.linkButton}>
-              <Text style={styles.linkText}>Change number</Text>
-            </Pressable>
-          </View>
-        )}
+          )}
 
-        <Text style={styles.footer}>
-          By continuing, you agree to our Terms & Privacy Policy
-        </Text>
-      </View>
-    </KeyboardAvoidingView>
+          <Text style={styles.footer}>
+            By continuing, you agree to our Terms & Privacy Policy
+          </Text>
+        </View>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BharatColors.bgGradientTop,
+  },
+  flex: {
+    flex: 1,
   },
   content: {
     flex: 1,

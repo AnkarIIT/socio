@@ -138,7 +138,10 @@ export function useFollowUser() {
 export function useSearchUsers(query: string) {
   return useQuery({
     queryKey: ['search', 'users', query],
-    queryFn: () => api.get<{ items: User[] }>(`/search/users?q=${encodeURIComponent(query)}`),
+    queryFn: () =>
+      api.get<{ users: User[]; posts: { id: string; text: string | null; author: { username: string; name: string; avatarUrl: string | null }; createdAt: string }[]; hashtags: { tag: string; postCount: number }[] }>(
+        `/search?q=${encodeURIComponent(query)}`,
+      ),
     enabled: query.length >= 2,
   });
 }

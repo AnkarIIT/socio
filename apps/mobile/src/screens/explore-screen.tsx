@@ -10,6 +10,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { BharatColors, Spacing, FontSize, FontWeight, Radius } from '@/constants/theme';
 import { useSearchUsers } from '@/hooks/use-api';
 import type { User } from '@/types/api';
@@ -27,10 +28,13 @@ export function ExploreScreen() {
   const [query, setQuery] = useState('');
   const searchQuery = useSearchUsers(query);
 
-  const users: User[] = searchQuery.data?.items ?? [];
+  const users: User[] = searchQuery.data?.users ?? [];
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <LinearGradient
+      colors={[BharatColors.bgGradientTop, BharatColors.bgGradientBottom]}
+      style={[styles.container, { paddingTop: insets.top }]}
+    >
       <StatusBar style="light" />
 
       {/* Header */}
@@ -62,7 +66,6 @@ export function ExploreScreen() {
         showsVerticalScrollIndicator={false}
       >
         {query.length >= 2 ? (
-          /* Search results */
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>People</Text>
             {users.length === 0 && !searchQuery.isLoading && (
@@ -91,7 +94,6 @@ export function ExploreScreen() {
             ))}
           </View>
         ) : (
-          /* Trending section */
           <>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Trending Now</Text>
@@ -112,8 +114,8 @@ export function ExploreScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Suggested for You</Text>
               {[
-                { username: 'techwithraj', name: 'Raj Kumar', bio: 'Building in public 🚀' },
-                { username: 'foodie.nisha', name: 'Nisha Gupta', bio: 'Food is love ❤️' },
+                { username: 'techwithraj', name: 'Raj Kumar', bio: 'Building in public' },
+                { username: 'foodie.nisha', name: 'Nisha Gupta', bio: 'Food is love' },
                 { username: 'fitness.suresh', name: 'Suresh Patel', bio: 'Train. Eat. Repeat.' },
               ].map((user) => (
                 <View key={user.username} style={styles.userRow}>
@@ -135,14 +137,13 @@ export function ExploreScreen() {
           </>
         )}
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BharatColors.bgGradientTop,
   },
   header: {
     paddingHorizontal: Spacing.xxl,
