@@ -36,3 +36,6 @@ coverage/
 Thumbs.db
 .idea/
 .vscode/
+
+# Root-level design assets
+social_UI.png
