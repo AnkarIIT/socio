@@ -55,11 +55,11 @@ export function UserProfileScreen() {
         {/* Stats */}
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{profile?.postsCount ?? 0}</Text>
+            <Text style={styles.statNumber}>{profile?.postCount ?? 0}</Text>
             <Text style={styles.statLabel}>Posts</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{profile?.followersCount ?? 0}</Text>
+            <Text style={styles.statNumber}>{profile?.followerCount ?? 0}</Text>
             <Text style={styles.statLabel}>Followers</Text>
           </View>
           <View style={styles.statItem}>
@@ -71,11 +71,11 @@ export function UserProfileScreen() {
         {/* Follow / Message buttons */}
         <View style={styles.actionsRow}>
           <Pressable
-            style={[styles.followButton, profile?.isFollowing && styles.followingButton]}
+            style={[styles.followButton, profile?.user.isFollowing && styles.followingButton]}
             onPress={() => profile && followMutation.mutate(profile.user.id)}
           >
-            <Text style={[styles.followButtonText, profile?.isFollowing && styles.followingButtonText]}>
-              {profile?.isFollowing ? 'Following' : 'Follow'}
+            <Text style={[styles.followButtonText, profile?.user.isFollowing && styles.followingButtonText]}>
+              {profile?.user.isFollowing ? 'Following' : 'Follow'}
             </Text>
           </Pressable>
           <Pressable style={styles.messageButton}>
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   followingButton: {
-    backgroundColor: BharatColors.backgroundElement,
+    backgroundColor: BharatColors.surfaceOverlay,
   },
   followButtonText: {
     color: '#FFFFFF',
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   },
   messageButton: {
     flex: 1,
-    backgroundColor: BharatColors.backgroundElement,
+    backgroundColor: BharatColors.surfaceOverlay,
     borderRadius: Radius.sm,
     paddingVertical: Spacing.md,
     alignItems: 'center',

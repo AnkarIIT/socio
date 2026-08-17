@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BharatColors, Spacing, FontSize, FontWeight, Radius } from '@/constants/theme';
 import { useSearchUsers } from '@/hooks/use-api';
-import type { User } from '@/types/api';
+import type { UserSummary } from '@/types/api';
 
 const TRENDING_TAGS = [
   { tag: 'DiwaliVibes', posts: '12.4k' },
@@ -28,7 +28,7 @@ export function ExploreScreen() {
   const [query, setQuery] = useState('');
   const searchQuery = useSearchUsers(query);
 
-  const users: User[] = searchQuery.data?.users ?? [];
+  const users: UserSummary[] = searchQuery.data?.users ?? [];
 
   return (
     <LinearGradient

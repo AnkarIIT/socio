@@ -90,8 +90,7 @@ export function CreatePostScreen() {
     }
     setUploading(true);
     try {
-      let mediaUrl: string | undefined;
-      let mediaType: string | undefined;
+      let mediaKeys: string[] | undefined;
 
       if (imageUri) {
         const info = await FileSystem.getInfoAsync(imageUri);
@@ -99,15 +98,14 @@ export function CreatePostScreen() {
         const filename = getFilename(imageUri);
         const sizeBytes = info.exists && 'size' in info ? info.size : 0;
 
-        const { key } = await uploadMedia(imageUri, mimeType, sizeBytes, filename);
-        mediaUrl = key;
-        mediaType = mimeType.startsWith('video/') ? 'video' : 'image';
+        const { assetId } = await uploadMedia(imageUri, mimeType, sizeBytes, filename);
+        mediaKeys = [assetId];
       }
 
       await createPost.mutateAsync({
-        body: body.trim(),
-        mediaUrl,
-        mediaType,
+        text: body.trim() || undefined,
+        mediaKeys,
+        status: 'PENDING',
       });
       router.back();
     } catch (err: any) {

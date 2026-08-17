@@ -11,25 +11,49 @@ export interface User {
   createdAt: string;
 }
 
+/** UserSummary from backend — minimal user for lists */
+export interface UserSummary {
+  id: string;
+  username: string;
+  name: string;
+  avatarUrl: string | null;
+  isVerified: boolean;
+  bio: string | null;
+  isFollowing: boolean;
+  followerCount: number;
+  postCount: number;
+}
+
+export interface Media {
+  kind: 'IMAGE' | 'VIDEO';
+  url: string;
+  width: number | null;
+  height: number | null;
+  durationMs: number | null;
+}
+
 export interface Post {
   id: string;
   authorId: string;
-  body: string;
-  mediaUrl: string | null;
-  mediaType: 'image' | 'video' | null;
+  text: string | null;
+  langTag: string | null;
+  media: Media[];
   likeCount: number;
   commentCount: number;
-  isLiked: boolean;
-  author: User;
+  shareCount: number;
+  reacted: boolean;
+  publishedAt: string | null;
   createdAt: string;
+  author: UserSummary;
 }
 
 export interface Comment {
   id: string;
   postId: string;
   authorId: string;
-  body: string;
-  author: User;
+  text: string;
+  parentId: string | null;
+  author: UserSummary;
   createdAt: string;
 }
 
@@ -39,13 +63,10 @@ export interface FeedResponse {
 }
 
 export interface ProfileResponse {
-  user: User;
-  postsCount: number;
-  followersCount: number;
+  user: UserSummary;
+  postCount: number;
+  followerCount: number;
   followingCount: number;
-  isFollowing: boolean;
-  isMuted: boolean;
-  isBlocked: boolean;
 }
 
 export interface Story {
@@ -55,7 +76,7 @@ export interface Story {
 }
 
 export interface SearchResponse {
-  users: User[];
+  users: UserSummary[];
   posts: {
     id: string;
     text: string | null;
@@ -80,4 +101,11 @@ export interface MediaAsset {
   width: number | null;
   height: number | null;
   createdAt: string;
+}
+
+export interface CreatePostDto {
+  text?: string;
+  langTag?: string;
+  mediaKeys?: string[];
+  status?: 'DRAFT' | 'PENDING';
 }

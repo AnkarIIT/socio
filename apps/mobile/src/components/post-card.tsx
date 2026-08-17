@@ -26,13 +26,14 @@ function formatTimeAgo(dateString: string): string {
 export function PostCard({ post }: PostCardProps) {
   const router = useRouter();
   const likeMutation = useLikePost();
-  const isLiked = post.isLiked;
+  const isLiked = post.reacted;
 
   const handleLike = () => {
     likeMutation.mutate(post.id);
   };
 
-  const hasImage = !!post.mediaUrl;
+  const hasImage = post.media.length > 0;
+  const firstMedia = post.media[0];
 
   return (
     <View style={styles.card}>
@@ -64,7 +65,7 @@ export function PostCard({ post }: PostCardProps) {
       {/* Post image */}
       {hasImage ? (
         <Image
-          source={{ uri: post.mediaUrl! }}
+          source={{ uri: firstMedia.url }}
           style={styles.postImage}
           contentFit="cover"
           transition={300}
@@ -72,13 +73,13 @@ export function PostCard({ post }: PostCardProps) {
         />
       ) : (
         <View style={styles.textOnlyPost}>
-          <Text style={styles.textOnlyBody}>{post.body}</Text>
+          <Text style={styles.textOnlyBody}>{post.text}</Text>
         </View>
       )}
 
-      {/* Post body (shown below image if image exists) */}
-      {hasImage && (
-        <Text style={styles.body}>{post.body}</Text>
+      {/* Post text (shown below image if image exists) */}
+      {hasImage && post.text && (
+        <Text style={styles.body}>{post.text}</Text>
       )}
 
       {/* Action row */}

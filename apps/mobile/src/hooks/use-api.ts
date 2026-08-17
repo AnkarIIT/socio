@@ -1,6 +1,18 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import type { FeedResponse, Post, ProfileResponse, SearchResponse, User } from '@/types/api';
+import type {
+  CreatePostDto,
+  FeedResponse,
+  Post,
+  ProfileResponse,
+  SearchResponse,
+  UserSummary,
+} from '@/types/api';
+
+interface FeedData {
+  pages: { items: Post[]; nextCursor: string | null }[];
+  pageParams: (string | null)[];
+}
 
 export function useFeed() {
   return useInfiniteQuery({
@@ -39,8 +51,7 @@ export function useFeedWithMock() {
 export function useCreatePost() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { body: string; mediaUrl?: string; mediaType?: string }) =>
-      api.post<Post>('/posts', body),
+    mutationFn: (dto: CreatePostDto) => api.post<Post>('/posts', dto),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['feed'] });
     },
@@ -54,24 +65,24 @@ export function useLikePost() {
       const data = await api.post<{ liked: boolean; likeCount: number }>(
         `/posts/${postId}/like`,
       );
-      return data;
+      return { reacted: data.liked, likeCount: data.likeCount };
     },
     onMutate: async (postId) => {
       await qc.cancelQueries({ queryKey: ['feed'] });
       const previous = qc.getQueriesData({ queryKey: ['feed'] });
 
-      qc.setQueriesData({ queryKey: ['feed'] }, (old: { pages: { items: Post[]; nextCursor: string | null }[] } | undefined) => {
+      qc.setQueriesData({ queryKey: ['feed'] }, (old: FeedData | undefined) => {
         if (!old) return old;
         return {
           ...old,
-          pages: old.pages.map((page: { items: Post[]; nextCursor: string | null }) => ({
+          pages: old.pages.map((page) => ({
             ...page,
-            items: page.items.map((item: Post) =>
+            items: page.items.map((item) =>
               item.id === postId
                 ? {
                     ...item,
-                    isLiked: !item.isLiked,
-                    likeCount: item.isLiked ? item.likeCount - 1 : item.likeCount + 1,
+                    reacted: !item.reacted,
+                    likeCount: item.reacted ? item.likeCount - 1 : item.likeCount + 1,
                   }
                 : item,
             ),
@@ -104,7 +115,7 @@ export function useFollowUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (userId: string) => {
-      const data = await api.post<{ following: boolean }>(`/users/${userId}/follow`);
+      const data = await api.post<{ following: boolean; followerCount: number }>(`/users/${userId}/follow`);
       return data;
     },
     onMutate: async (userId) => {
@@ -115,10 +126,16 @@ export function useFollowUser() {
         if (!old) return old;
         return {
           ...old,
-          isFollowing: !old.isFollowing,
-          followersCount: old.isFollowing
-            ? old.followersCount - 1
-            : old.followersCount + 1,
+          user: {
+            ...old.user,
+            isFollowing: !old.user.isFollowing,
+            followerCount: old.user.isFollowing
+              ? old.user.followerCount - 1
+              : old.user.followerCount + 1,
+          },
+          followerCount: old.user.isFollowing
+            ? old.followerCount - 1
+            : old.followerCount + 1,
         };
       });
 
@@ -170,41 +187,45 @@ export async function uploadMedia(
   return { assetId: presign.assetId, key: presign.key };
 }
 
-const MOCK_USER: User = {
+const MOCK_USER: UserSummary = {
   id: 'mock-1',
   username: 'priya.designs',
   name: 'Priya Sharma',
   avatarUrl: null,
-  coverUrl: null,
-  bio: 'Designer & photographer. Capturing the beauty of everyday life.',
   isVerified: true,
-  isPrivate: false,
-  locale: 'en',
-  createdAt: '2025-01-15T00:00:00.000Z',
+  bio: 'Designer & photographer. Capturing the beauty of everyday life.',
+  isFollowing: false,
+  followerCount: 12400,
+  postCount: 247,
 };
 
 const MOCK_POSTS: Post[] = [
   {
     id: 'mock-post-1',
     authorId: 'mock-1',
-    body: 'Beautiful sunset at Marina Beach, Chennai. The colors were unreal!',
-    mediaUrl: null,
-    mediaType: 'image',
+    text: 'Beautiful sunset at Marina Beach, Chennai. The colors were unreal!',
+    langTag: 'en',
+    media: [],
     likeCount: 234,
     commentCount: 42,
-    isLiked: false,
-    author: MOCK_USER,
+    shareCount: 5,
+    reacted: false,
+    publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    author: MOCK_USER,
   },
   {
     id: 'mock-post-2',
     authorId: 'mock-2',
-    body: 'New coffee shop in Bangalore — the filter kaapi here is incredible',
-    mediaUrl: null,
-    mediaType: 'image',
+    text: 'New coffee shop in Bangalore — the filter kaapi here is incredible',
+    langTag: 'en',
+    media: [],
     likeCount: 89,
     commentCount: 12,
-    isLiked: true,
+    shareCount: 2,
+    reacted: true,
+    publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
     author: {
       ...MOCK_USER,
       id: 'mock-2',
@@ -212,18 +233,22 @@ const MOCK_POSTS: Post[] = [
       name: 'Arjun Menon',
       bio: 'Travel blogger. Exploring Bharat one city at a time.',
       isVerified: false,
+      followerCount: 8900,
+      postCount: 156,
     },
-    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: 'mock-post-3',
     authorId: 'mock-3',
-    body: 'Diwali prep at full speed! The rangoli this year is next level',
-    mediaUrl: null,
-    mediaType: 'image',
+    text: 'Diwali prep at full speed! The rangoli this year is next level',
+    langTag: 'en',
+    media: [],
     likeCount: 567,
     commentCount: 88,
-    isLiked: false,
+    shareCount: 12,
+    reacted: false,
+    publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
     author: {
       ...MOCK_USER,
       id: 'mock-3',
@@ -231,8 +256,9 @@ const MOCK_POSTS: Post[] = [
       name: 'Meera Iyer',
       bio: 'Food & lifestyle. Made with love from Madurai.',
       isVerified: true,
+      followerCount: 23100,
+      postCount: 432,
     },
-    createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
   },
 ];
 
