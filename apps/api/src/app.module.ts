@@ -14,6 +14,7 @@ import { CommentModule } from './modules/comment/comment.module';
 import { LikeModule } from './modules/like/like.module';
 import { MediaModule } from './modules/media/media.module';
 import { SearchModule } from './modules/search/search.module';
+import { SocialModule } from './modules/social/social.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { SearchModule } from './modules/search/search.module';
     LikeModule,
     MediaModule,
     SearchModule,
+    SocialModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

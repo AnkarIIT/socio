@@ -1,10 +1,16 @@
 jest.mock('../../prisma/prisma.service', () => ({
   PrismaService: jest.fn().mockImplementation(() => ({})),
 }));
+jest.mock('../social/social.service', () => ({
+  SocialService: jest.fn().mockImplementation(() => ({
+    getBlockedIds: jest.fn().mockResolvedValue(new Set()),
+  })),
+}));
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { PostService } from './post.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { SocialService } from '../social/social.service';
 import { ErrorCode } from '@bharat/shared';
 
 const mockPrisma = {
@@ -15,12 +21,17 @@ const mockPrisma = {
     update: jest.fn(),
     delete: jest.fn(),
   },
+  follow: { findMany: jest.fn().mockResolvedValue([]) },
   mediaAsset: { updateMany: jest.fn() },
   like: {
     findUnique: jest.fn(),
     findMany: jest.fn(),
   },
 } satisfies Record<string, { [k: string]: jest.Mock }>;
+
+const mockSocial = {
+  getBlockedIds: jest.fn().mockResolvedValue(new Set()),
+};
 
 describe('PostService', () => {
   let service: PostService;
@@ -30,6 +41,7 @@ describe('PostService', () => {
       providers: [
         PostService,
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: SocialService, useValue: mockSocial },
       ],
     }).compile();
 

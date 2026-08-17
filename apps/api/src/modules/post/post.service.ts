@@ -8,6 +8,7 @@ import type {
 } from '@bharat/contracts';
 import { encodeCursor, decodeCursor } from '@bharat/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { SocialService } from '../social/social.service';
 import {
   notFound,
   forbidden,
@@ -43,7 +44,10 @@ type PostWithAuthor = {
 export class PostService {
   private readonly logger = new Logger(PostService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly social: SocialService,
+  ) {}
 
   async create(authorId: string, dto: CreatePostDto): Promise<PostPublic> {
     if (!dto.text && (!dto.mediaKeys || dto.mediaKeys.length === 0)) {
@@ -154,9 +158,21 @@ export class PostService {
     const limit = query.limit;
     const cursor = query.cursor ? decodeCursor(query.cursor) : null;
 
+    // Get followee IDs + own ID for follow-based feed
+    const followees = await this.prisma.follow.findMany({
+      where: { followerId: userId },
+      select: { followeeId: true },
+    });
+    const followeeIds = followees.map((f) => f.followeeId);
+    const authorIds = [...new Set([userId, ...followeeIds])];
+
+    // Get blocked users to exclude
+    const blockedIds = await this.social.getBlockedIds(userId);
+    const excludeIds = [...blockedIds];
+
     const where: Record<string, unknown> = {
       status: 'PUBLISHED',
-      author: { bannedAt: null },
+      authorId: { in: authorIds, notIn: excludeIds },
     };
 
     if (cursor) {
