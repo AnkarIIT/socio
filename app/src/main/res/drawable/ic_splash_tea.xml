@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Tea cup body -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M30,38 L78,38 L72,78 Q66,88 54,88 Q42,88 36,78 Z" />
+    <!-- Tea cup handle -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M78,48 Q90,48 90,58 Q90,68 78,68" />
+    <!-- Saucer -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M24,88 Q54,96 84,88 L84,92 Q54,100 24,92 Z" />
+    <!-- Steam -->
+    <path
+        android:fillColor="#FFD4A017"
+        android:pathData="M42,28 Q44,20 42,12" />
+    <path
+        android:fillColor="#FFD4A017"
+        android:pathData="M54,26 Q56,18 54,10" />
+    <path
+        android:fillColor="#FFD4A017"
+        android:pathData="M66,28 Q68,20 66,12" />
+</vector>
