@@ -1,9 +1,15 @@
 package com.example.data.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "comments")
+@Entity(
+    tableName = "comments",
+    indices = [
+        Index(value = ["postId"])
+    ]
+)
 data class CommentEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

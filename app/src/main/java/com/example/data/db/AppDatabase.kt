@@ -23,7 +23,7 @@ import com.example.data.model.ReelEntity
         FollowEntity::class,
         ReelEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -45,7 +45,8 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "teagram_db"
-                ).fallbackToDestructiveMigration(false).build()
+                ).addMigrations(MIGRATION_3_4)
+                 .fallbackToDestructiveMigration(false).build()
                 INSTANCE = instance
                 instance
             }
