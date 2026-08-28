@@ -1,50 +1,22 @@
-# Bharat — "Instagram for Bharat"
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-Vernacular-first, lightweight social network for India. Posts, stories, rooms, and chat — built for 2GB-RAM phones and slow networks.
+# Run and deploy your AI Studio app
 
-## Repo layout
+This contains everything you need to run your app locally.
 
-```
-apps/
-  api/       NestJS 11 API (modular monolith)
-  mobile/    Expo SDK 56 React Native app
-packages/
-  contracts/ Zod API contracts (single source of truth)
-  shared/    Shared utils + error codes
-```
+View your app in AI Studio: https://ai.studio/apps/7470b951-f120-408e-b4fc-f07b38ac44a0
 
-## Docs
+## Run Locally
 
-- `outputs/product-spec.md` — product spec (what we build and why)
-- `outputs/architecture-decision.md` — architecture decision record (how we build it)
-- `outputs/spec-set.provenance.md` — decision log
+**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
 
-## Prerequisites
 
-- Node.js >= 20.19
-- Docker (Postgres 16 + Redis 7 for local dev)
-
-## Quick start
-
-```bash
-npm install
-npm run db:up            # start Postgres + Redis
-npm run db:generate      # prisma generate
-cp apps/api/.env.example apps/api/.env
-npm run dev:api          # API on :3000
-npm run dev:mobile       # Expo app
-```
-
-## Scripts
-
-| Script | Purpose |
-|---|---|
-| `dev:api` | NestJS watch mode |
-| `dev:mobile` | Expo dev server |
-| `db:migrate` | Run prisma migrations |
-| `build` / `lint` / `typecheck` / `test` | Across all workspaces |
-
-## Standards
-
-- Contract-first: every API request/response defined in `packages/contracts` (Zod), consumed by API for validation and mobile for types.
-- ADR format in `outputs/architecture-decision.md` — decisions have rationale and reversal triggers.
+1. Open Android Studio
+2. Select **Open** and choose the directory containing this project
+3. Allow Android Studio to fix any incompatibilities as it imports the project.
+4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
+5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
+6. Run the app on an emulator or physical device
+7. If you have already published your app in AI Studio, please [request upload key reset](https://support.google.com/googleplay/android-developer/answer/9842756#zippy=%2Crequest-an-upload-key-reset) in Google Play Console.

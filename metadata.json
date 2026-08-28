@@ -1,0 +1,6 @@
+{
+  "name": "Instagram",
+  "description": "A social photo and video sharing app with feed, stories, explore, reels, direct messages, and user profiles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

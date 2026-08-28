@@ -1,41 +1,18 @@
-# Dependencies
-node_modules/
-
-# Build output
-dist/
-build/
-
-# Env / secrets
-.env
-.env.local
-.env.*.local
-!.env.example
-
-# Generated code
-apps/api/src/generated/
-apps/api/prisma/generated/
-
-# Logs
-*.log
-npm-debug.log*
-
-# Expo
-.expo/
-apps/mobile/.expo/
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Test coverage
-coverage/
-
-# OS / editor
+*.iml
+.gradle
+.kotlin
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
 .DS_Store
-Thumbs.db
-.idea/
-.vscode/
-
-# Root-level design assets
-social_UI.png
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+.env
+debug.keystore
